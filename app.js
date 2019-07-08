@@ -4,8 +4,10 @@ const path = require('path'),
   Koa = require('koa'),
   static = require('koa-static'),
   session = require("koa-session"),
-  koaBody = require('koa-body');
-
+  convert = require('koa-convert'),
+  koaBody = convert(require('koa-body'));
+  
+  
 const config = require('./config.json');
 
 const app = new Koa();
@@ -16,6 +18,7 @@ config.db.port = process.env.DB_PORT;
 config.db.name = process.env.DB_NAME;
 config.db.user = process.env.DB_USER;
 config.db.password = process.env.DB_PASS;
+
 require('./db');
 
 app.keys = ['secret'];
@@ -31,11 +34,11 @@ app.use(session({
 }, app));
 
 app.use(koaBody({
+  multipart: true,
   formidable: {
-    uploadDir: path.join(process.cwd(), 'public', 'upload')
-  },
-  multipart: true
-}))
+    uploadDir: path.join(__dirname, 'public', 'upload')
+  }
+}));
 
 app.use(static(path.join(__dirname, 'public')));
 

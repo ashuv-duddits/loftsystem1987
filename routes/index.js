@@ -5,21 +5,46 @@ const send = require('koa-send');
 // const homeController = require('../controllers/homeController');
 const userController = require('../controllers/userController');
 
-router.get('/getUsers', async (ctx) => {
+router.get('/api/getUsers', async (ctx) => {
   try {
     const result = await userController.getUsers();
-    ctx.toJSON({data: result})
+    ctx.status = 200;
+    ctx.body = result;
   } 
   catch (error) {
     console.error("error", error);
     ctx.status = error.code || 500;
-    ctx.toJSON({message: error.message, code: error.code});
+    ctx.body = {message: error.message, code: error.code};
   }
 });
 
 router.post('/api/saveNewUser', async (ctx) => {
   try {
-    const result = await userController.saveNewUser(JSON.parse(ctx.request.body));
+    const result = await userController.saveNewUser(ctx.request.body);
+    ctx.body = result;
+  } 
+  catch (error) {
+    console.error("error", error);
+    ctx.status = error.code || 500;
+    ctx.body = {message: error.message, code: error.code};
+  }
+});
+
+router.put('/api/updateUser/:id', async (ctx) => {
+  try {
+    const result = await userController.updateUser(ctx);
+    ctx.body = result;
+  } 
+  catch (error) {
+    console.error("error", error);
+    ctx.status = error.code || 500;
+    ctx.body = {message: error.message, code: error.code};
+  }
+});
+
+router.post('/api/saveUserImage/:id', async (ctx) => {
+  try {
+    const result = await userController.saveUserImage(ctx);
     ctx.body = result;
   } 
   catch (error) {
@@ -32,6 +57,7 @@ router.post('/api/saveNewUser', async (ctx) => {
 router.post('/api/login', async (ctx) => {
   try {
     const result = await userController.login(ctx);
+    ctx.status = 200;
     ctx.body = result;
   } 
   catch (error) {
@@ -42,7 +68,7 @@ router.post('/api/login', async (ctx) => {
 });
 
 router.get('*', async (ctx) => {
-  await send(ctx, path.join(__dirname, 'public', 'index.html'));
+  await send(ctx, path.join('public', 'index.html'));
 })
 
 module.exports = router;
