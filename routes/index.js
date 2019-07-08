@@ -54,6 +54,18 @@ router.post('/api/saveUserImage/:id', async (ctx) => {
   }
 });
 
+router.delete('/api/deleteUser/:id', async (ctx) => {
+  try {
+    const result = await userController.deleteUser(ctx);
+    ctx.body = result;
+  } 
+  catch (error) {
+    console.error("error", error);
+    ctx.status = error.code || 500;
+    ctx.body = {message: error.message, code: error.code};
+  }
+});
+
 router.post('/api/login', async (ctx) => {
   try {
     const result = await userController.login(ctx);

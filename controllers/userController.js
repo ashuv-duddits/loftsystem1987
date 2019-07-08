@@ -69,6 +69,19 @@ exports.saveNewUser = ({ username, firstName, middleName, surName, password }) =
   }
 })
 
+exports.deleteUser = (ctx) => new Promise(async (resolve, reject) => {
+  try {
+    const result = await User.deleteOne({_id: ctx.params.id});
+    resolve(resultConverter(result));
+  }
+  catch (error) {
+    reject({
+      message: error.message,
+      code: 500
+    });
+  }
+})
+
 exports.updateUser = (ctx) => new Promise(async (resolve, reject) => {
   try {
     let comparePassword = () => new Promise(function(resolve, reject) {
@@ -135,8 +148,7 @@ exports.saveUserImage = (ctx) => new Promise(async (resolve, reject) => {
           }
           console.log('Rename completed!');
   
-          let dir = newPath.substr(newPath.indexOf('\\'));
-  
+          let dir = path.normalize(newPath.substr(newPath.indexOf('\\')));
           await User.updateOne({_id: id}, {image: dir});
           let newUser = await User.findById(id);
           resolve(newUser);
