@@ -5,7 +5,7 @@ node_js:
 deploy:
   provider: heroku
   api_key:
-    secure: $he
+    secure: '9d6e5c01-3cc3-43b9-aedd-1f1fd8454375'
   strategy: git
 
 app:
