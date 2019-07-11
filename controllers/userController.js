@@ -1,13 +1,16 @@
 const User = require('../models/user');
+const Permission = require('../models/permission');
 const bcrypt = require('bcrypt');
 const passport = require('koa-passport');
 const validation = require('../services/validation');
 const fs = require('fs');
 const path = require('path');
+const uuidv4 = require('uuid/v4');
 
-const resultConverter = (item) => {
+const resultConverter = async (item) => {
+  const permission = await Permission.findById(item.permissionId);
   return {
-    access_token: "dadas141414",
+    access_token: item.access_token,
     id: item.id,
     username: item.username,
     password: item.password,
@@ -16,33 +19,20 @@ const resultConverter = (item) => {
     surName: item.surName,
     image: item.image,
     permission: {
-      chat: {
-        C: false,
-        D: false,
-        R: false,
-        U: false
-      },
-      news: {
-        C: false,
-        D: false,
-        R: false,
-        U: false
-      },
-      setting: {
-        C: false,
-        D: false,
-        R: false,
-        U: false
-      }
+      chat: permission.chat,
+      news: permission.news,
+      setting: permission.setting,
     },
-    permissionId: ""
+    permissionId: item.permissionId
   }
 }
 
 exports.getUsers = () => new Promise(async (resolve, reject) => {
   try {
-    let result = await User.find();
-    resolve(result.map((item) => resultConverter(item)))
+    const users = await User.find();
+    Promise.all(users.map((item) => resultConverter(item))).then(function(results) {
+      resolve(results);
+    })
   }
   catch (err) {
     reject({
@@ -54,12 +44,44 @@ exports.getUsers = () => new Promise(async (resolve, reject) => {
 
 exports.saveNewUser = ({ username, firstName, middleName, surName, password }) => new Promise(async (resolve, reject) => {
   try {
+    const newPermission = new Permission({
+      chat: {
+        C: false,
+        D: false,
+        R: true,
+        U: false
+      },
+      news: {
+        C: true,
+        D: false,
+        R: true,
+        U: false
+      },
+      setting: {
+        C: false,
+        D: false,
+        R: false,
+        U: false
+      }
+    })
+    const permission = await newPermission.save();
+
     let hash = await bcrypt.hash(password, 10);
+    let access_token = uuidv4();
     const newUser = new User({
-      username, firstName, middleName, surName, password: hash, image: ""
+      username,
+      firstName,
+      middleName,
+      surName,
+      password: hash,
+      image: "",
+      permissionId: permission.id,
+      access_token: access_token
     })
     const result = await newUser.save();
-    resolve(resultConverter(result));
+    Promise.resolve(resultConverter(result)).then(function(user) {
+      resolve(user);
+    })
   }
   catch (error) {
     reject({
@@ -72,7 +94,9 @@ exports.saveNewUser = ({ username, firstName, middleName, surName, password }) =
 exports.deleteUser = (ctx) => new Promise(async (resolve, reject) => {
   try {
     const result = await User.deleteOne({_id: ctx.params.id});
-    resolve(resultConverter(result));
+    Promise.resolve(resultConverter(result)).then(function(result) {
+      resolve(result);
+    })
   }
   catch (error) {
     reject({
@@ -112,7 +136,9 @@ exports.updateUser = (ctx) => new Promise(async (resolve, reject) => {
     })
     await User.updateOne({_id: ctx.params.id}, updateObject);
     const user = await User.findById(ctx.params.id);
-    resolve(resultConverter(user));
+    Promise.resolve(resultConverter(user)).then(function(user) {
+      resolve(user);
+    })
   }
   catch (error) {
     reject({
@@ -159,7 +185,9 @@ exports.saveUserImage = (ctx) => new Promise(async (resolve, reject) => {
     const fileName = path.join('./public', 'upload', files[id].name);
     if (files[id].path) {
       let user = await rename(files[id].path, fileName);
-      resolve(resultConverter(user));
+      Promise.resolve(resultConverter(user)).then(function(user) {
+        resolve(user);
+      })
     }
   }
   catch (error) {
@@ -194,10 +222,38 @@ exports.login = (ctx) => new Promise(async (resolve, reject) => {
               code: 500
             });
           }
-          resolve(resultConverter(user));
+          let access_token = uuidv4();
+          if (ctx.request.body.remembered) {
+            ctx.cookies.set('access_token', access_token, {
+              httpOnly: false,
+              maxAge: 10*60*1000
+            })
+          }
+          await user.update({access_token: access_token});
+          await user.save();
+          Promise.resolve(resultConverter(user)).then(function(user) {
+            resolve(user);
+          })
         });
       }
     })(ctx)
+  }
+  catch (error) {
+    reject({
+      message: error.message,
+      code: 500
+    });
+  }
+})
+
+exports.authFromToken = ({access_token}) => new Promise(async (resolve, reject) => {
+  try {
+    console.log(access_token)
+    const user = await User.findOne({access_token});
+    console.log(user)
+    Promise.resolve(resultConverter(user)).then(function(user) {
+      resolve(user);
+    })
   }
   catch (error) {
     reject({

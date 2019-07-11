@@ -24,3 +24,5 @@ db.on('error', (err) => {
 db.on('disconnected', () => {
   console.log('Mongoose disconnected')
 });
+
+module.exports = db;

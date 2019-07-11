@@ -23,6 +23,15 @@ const UserSchema = new mongoose.Schema({
   image: {
     type: String
   },
+  access_token: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  permissionId: {
+    type: String,
+    required: true
+  },
 });
 
 UserSchema.methods.validPassword = async function(password) {

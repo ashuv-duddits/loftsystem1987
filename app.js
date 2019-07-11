@@ -6,11 +6,40 @@ const path = require('path'),
   session = require("koa-session"),
   convert = require('koa-convert'),
   koaBody = convert(require('koa-body'));
+
+const User = require('./models/user');
   
   
 const config = require('./config.json');
 
 const app = new Koa();
+
+const server = require('http').createServer(app.callback());
+const io = require('socket.io')(server);
+
+const clients = {};
+
+io.on('connection', async function(socket){
+  console.log('connected')
+  const user = await User.findOne({username: socket.handshake.headers['username']});
+  const id = user.id;
+  clients[id] = {id: socket.id, username: user.username}
+  console.log(clients);
+
+  socket.emit('all users', clients);
+
+  socket.broadcast.emit('new user', clients[id]);
+
+  socket.on('chat message', (message, socketId) => {
+    socket.to(socketId).emit('chat message', message, clients[id].id);
+  }); 
+
+  socket.on('disconnect', () => {
+    socket.broadcast.emit('delete user', clients[id].id);
+    delete clients[id];
+    socket.emit('all users', clients);
+  });
+});
 
 // подключение к БД mongodb
 config.db.host = process.env.DB_HOST;
@@ -22,16 +51,7 @@ config.db.password = process.env.DB_PASS;
 require('./db');
 
 app.keys = ['secret'];
-app.use(session({
-  key: 'koa:sess',
-  maxAge: 60*60*1000,
-  autoCommit: true,
-  overwrite: true, 
-  httpOnly: true, 
-  signed: true, 
-  rolling: false, 
-  renew: false,
-}, app));
+app.use(session({}, app));
 
 app.use(koaBody({
   multipart: true,
@@ -69,13 +89,30 @@ app.use(router.allowedMethods());
 //   // ctx.render('error', {message: err.message, error: err})
 // });
 
-app.listen(process.env.PORT, function(err) {
+server.listen(process.env.PORT, function(err) {
   if (err) {
     return console.log(err);
   }
+  setTimeout(async function() {
+    let existsAdmin = await User.findOne({username: 'admin'});
+    if (!existsAdmin) {
+      require('./install');
+    }
+  }, 3000)
 
   if (!fs.existsSync(path.join(__dirname, 'public', 'upload'))) {
     fs.mkdirSync(path.join(__dirname, 'public', 'upload'));
   }
   console.log('Сервер запущен на порту: ', process.env.PORT)
 })
+
+
+// t.prototype.sendMessage=function(){
+//   if(this.userInput){
+//     console.log("SEND: ",this.userInput);
+//     var e={text:this.userInput,isMyMessage:!0};
+//     this.history[this.activeRoom]?
+//     this.history[this.activeRoom].push(e)
+//     :(this.history[this.activeRoom]=[],this.history[this.activeRoom].push(e)),
+//     this.socket.emit("chat message",this.userInput,this.activeRoom),this.userInput=""}
+//   }
