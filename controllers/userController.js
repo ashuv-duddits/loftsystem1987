@@ -6,6 +6,7 @@ const validation = require('../services/validation');
 const fs = require('fs');
 const path = require('path');
 const uuidv4 = require('uuid/v4');
+const Jimp = require('jimp');
 
 const resultConverter = async (item) => {
   const permission = await Permission.findById(item.permissionId);
@@ -184,7 +185,15 @@ exports.saveUserImage = (ctx) => new Promise(async (resolve, reject) => {
 
     const fileName = path.join('./public', 'upload', files[id].name);
     if (files[id].path) {
-      let user = await rename(files[id].path, fileName);
+      let image = await Jimp.read(files[id].path);
+      await image
+      // .resize(Jimp.AUTO, 256) // resize
+      .cover(250, 250, Jimp.HORIZONTAL_ALIGN_CENTER | Jimp.VERTICAL_ALIGN_MIDDLE)
+      .quality(60) // set JPEG quality
+      .greyscale() // set greyscale
+      .write(`${fileName}_resize`); // save
+      fs.unlinkSync(files[id].path);
+      let user = await rename(`${fileName}_resize`, fileName);
       Promise.resolve(resultConverter(user)).then(function(user) {
         resolve(user);
       })
