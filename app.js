@@ -105,14 +105,3 @@ server.listen(process.env.PORT, function(err) {
   }
   console.log('Сервер запущен на порту: ', process.env.PORT)
 })
-
-
-// t.prototype.sendMessage=function(){
-//   if(this.userInput){
-//     console.log("SEND: ",this.userInput);
-//     var e={text:this.userInput,isMyMessage:!0};
-//     this.history[this.activeRoom]?
-//     this.history[this.activeRoom].push(e)
-//     :(this.history[this.activeRoom]=[],this.history[this.activeRoom].push(e)),
-//     this.socket.emit("chat message",this.userInput,this.activeRoom),this.userInput=""}
-//   }

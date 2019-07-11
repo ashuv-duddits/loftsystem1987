@@ -229,7 +229,7 @@ exports.login = (ctx) => new Promise(async (resolve, reject) => {
               maxAge: 10*60*1000
             })
           }
-          await user.update({access_token: access_token});
+          await user.updateOne({access_token: access_token});
           await user.save();
           Promise.resolve(resultConverter(user)).then(function(user) {
             resolve(user);

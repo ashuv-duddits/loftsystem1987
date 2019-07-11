@@ -5,7 +5,7 @@ const config = require('../config.json');
 
 mongoose.Promise = global.Promise;
 
-const connectionURL = `mongodb://${config.db.user}@${config.db.host}:${config.db.port}/${config.db.name}`;
+const connectionURL = `mongodb://${config.db.user}:${config.db.password}@${config.db.host}:${config.db.port}/${config.db.name}`;
 
 mongoose.connect(connectionURL, {useCreateIndex: true, useNewUrlParser: true}).catch((e) => {
   console.error(e)
