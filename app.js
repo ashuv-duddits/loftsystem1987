@@ -47,6 +47,7 @@ config.db.name = process.env.MLAB_DB_NAME;
 config.db.user = process.env.MLAB_DB_USER;
 config.db.password = process.env.MLAB_DB_PASS;
 
+
 require('./db');
 
 app.keys = ['secret'];
