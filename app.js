@@ -41,11 +41,11 @@ io.on('connection', async function(socket){
 });
 
 // подключение к БД mongodb
-config.db.host = process.env.DB_HOST;
-config.db.port = process.env.DB_PORT;
-config.db.name = process.env.DB_NAME;
-config.db.user = process.env.DB_USER;
-config.db.password = process.env.DB_PASS;
+config.db.host = process.env.MLAB_DB_HOST;
+config.db.port = process.env.MLAB_DB_PORT;
+config.db.name = process.env.MLAB_DB_NAME;
+config.db.user = process.env.MLAB_DB_USER;
+config.db.password = process.env.MLAB_DB_PASS;
 
 require('./db');
 
