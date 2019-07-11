@@ -9,4 +9,4 @@ deploy:
   strategy: git
 
 app:
-  master: loftsystem1987
+  master: loftsystem
