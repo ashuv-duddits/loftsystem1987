@@ -5,7 +5,7 @@ node_js:
 deploy:
   provider: heroku
   api_key:
-    secure: $her
+    secure: $he
   strategy: git
 
 app:
