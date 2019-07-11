@@ -9,7 +9,6 @@ const path = require('path'),
 
 const User = require('./models/user');
   
-  
 const config = require('./config.json');
 
 const app = new Koa();
