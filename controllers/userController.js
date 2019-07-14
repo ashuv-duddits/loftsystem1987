@@ -175,7 +175,12 @@ exports.saveUserImage = (ctx) => new Promise(async (resolve, reject) => {
           }
           console.log('Rename completed!');
   
-          let dir = path.normalize(newPath.substr(newPath.indexOf('\\')));
+          let dir = "";
+          if (process.env.NODE_ENV == 'production') {
+            dir = "upload/admin.jpg";
+          } else {
+            dir = path.normalize(newPath.substr(newPath.indexOf('\\')));
+          }
           console.log('dir', dir)
           await User.updateOne({_id: id}, {image: dir});
           let newUser = await User.findById(id);
