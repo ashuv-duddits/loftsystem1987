@@ -175,22 +175,14 @@ exports.saveUserImage = (ctx) => new Promise(async (resolve, reject) => {
           }
           console.log('Rename completed!');
   
-          let dir = "";
-          if (process.env.NODE_ENV == 'production') {
-            dir = "upload/admin.jpg";
-          } else {
-            dir = path.normalize(newPath.substr(newPath.indexOf('\\')));
-          }
-          console.log('dir', dir)
+          let dir = path.normalize(newPath.substr(newPath.indexOf('upload')));
           await User.updateOne({_id: id}, {image: dir});
           let newUser = await User.findById(id);
           resolve(newUser);
         })
       })
     }
-
     const fileName = path.join('public', 'upload', files[id].name);
-    console.log('fileName', fileName)
     if (files[id].path) {
       let image = await Jimp.read(files[id].path);
       await image
