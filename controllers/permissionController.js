@@ -8,14 +8,18 @@ exports.updateUserPermission = (ctx) => new Promise(async (resolve, reject) => {
     let news = 0;
     let setting = 0;
     Object.keys(ctx.request.body.permission).forEach(function(key){
-      if (key == 'chat') {
-        chat++;
-      }
-      if (key == 'news') {
-        news++;
-      }
-      if (key == 'setting') {
-        setting++;
+      switch (key) {
+        case 'chat':
+          chat++;
+          break;
+        case 'news':
+          news++;
+          break;
+        case 'setting':
+          setting++;
+          break;
+        default:
+          break;
       }
       if (key == 'chat' || key == 'news' || key == 'setting') {
         updatePermission[key] = ctx.request.body.permission[key];
@@ -24,17 +28,21 @@ exports.updateUserPermission = (ctx) => new Promise(async (resolve, reject) => {
         let u = 0;
         let d = 0;
         Object.keys(updatePermission[key]).forEach(function(i) {
-          if (i == 'C') {
-            c++;
-          }
-          if (i == 'R') {
-            r++;
-          }
-          if (i == 'U') {
-            u++;
-          }
-          if (i == 'D') {
-            d++;
+          switch (i) {
+            case 'C':
+              c++;
+              break;
+            case 'R':
+              r++;
+              break;
+            case 'U':
+              u++;
+              break;
+            case 'D':
+              d++;
+              break;
+            default:
+              break;
           }
         })
         if (c == 0) {

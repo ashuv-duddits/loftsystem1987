@@ -256,9 +256,7 @@ exports.login = (ctx) => new Promise(async (resolve, reject) => {
 
 exports.authFromToken = ({access_token}) => new Promise(async (resolve, reject) => {
   try {
-    console.log(access_token)
     const user = await User.findOne({access_token});
-    console.log(user)
     Promise.resolve(resultConverter(user)).then(function(user) {
       resolve(user);
     })
